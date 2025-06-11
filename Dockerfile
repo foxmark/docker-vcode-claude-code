@@ -31,25 +31,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
 # Set up locales
-RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-# Install Docker CLI (to communicate with the host's Docker daemon)
-#RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-#    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
-#    apt-get update && \
-#    apt-get install -y docker-ce-cli
+RUN locale-gen en_GB.UTF-8
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:en
+ENV LC_ALL en_GB.UTF-8
 
 # Install VS Code Server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # Copy Claude Code installation script and fix line endings
 COPY scripts/install-claude-code.sh /tmp/install-claude-code.sh
-RUN apt-get install -y dos2unix && \
-    dos2unix /tmp/install-claude-code.sh && \
-    chmod +x /tmp/install-claude-code.sh && \
+RUN chmod +x /tmp/install-claude-code.sh && \
     bash /tmp/install-claude-code.sh
 
 # Create a non-root user (developer)
@@ -62,11 +54,12 @@ RUN chown -R developer:developer /home/developer/.local
 
 # Switch to the non-root user
 USER developer
-WORKDIR /home/developer
 
 # Set up VS Code configuration
 RUN mkdir -p /home/developer/.config/code-server
 COPY config/code-server-config.yaml /home/developer/.config/code-server/config.yaml
+
+RUN mkdir -p /home/developer/code
 
 # Setup basic Claude Code directory
 RUN mkdir -p /home/developer/.claudecode
@@ -84,6 +77,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | s
     sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
     sudo apt update && sudo apt install -y gh
+
+WORKDIR /home/developer/code
 
 # Expose ports for VS Code Server and other services
 EXPOSE 8080 3000 8000
