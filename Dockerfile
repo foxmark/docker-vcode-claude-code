@@ -37,7 +37,10 @@ ENV LANGUAGE en_GB:en
 ENV LC_ALL en_GB.UTF-8
 
 # Install VS Code Server
-RUN curl -fsSL https://code-server.dev/install.sh | sh
+# RUN curl -fsSL https://code-server.dev/install.sh | sh
+COPY scripts/install-vscode.sh /tmp/install-vscode.sh
+RUN chmod +x /tmp/install-vscode.sh && \
+    bash /tmp/install-vscode.sh
 
 # Copy Claude Code installation script and fix line endings
 COPY scripts/install-claude-code.sh /tmp/install-claude-code.sh
