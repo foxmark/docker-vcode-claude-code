@@ -1,0 +1,13 @@
+services:
+  # service name will by used by other containers to connect
+  vscode_service:
+    image: my-dev-environment
+    container_name: vscode_container
+    volumes:
+      - ./code:/workspace
+      - ./config/code-server-config.yaml:/home/developer/.config/code-server/config.yaml
+      - /data:/home/developer/.local/share/code-server
+
+    ports:
+      - "8000:8000"
+      - "8080:8080"
