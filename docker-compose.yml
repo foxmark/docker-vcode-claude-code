@@ -1,7 +1,7 @@
 services:
   # service name will by used by other containers to connect
   vscode_service:
-    image: my-dev-environment
+    image: foxmark-vscode
     container_name: vscode_container
     volumes:
       - ./code:/workspace
