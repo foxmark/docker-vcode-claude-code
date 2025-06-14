@@ -1,13 +1,14 @@
 services:
   # service name will by used by other containers to connect
   vscode_service:
-    image: foxmark-vscode
+    image: foxmark/vscode-claude-code:latest
     container_name: vscode_container
     volumes:
       - ./code:/workspace
-      - ./config:/home/developer/.config/code-server/
-      - /data:/home/developer/.local/share/code-server
+      - ./config/code-server/config.yaml:/root/.config/code-server/config.yaml
+      - ./data/user:/home/root/.local/share/user
+#      - ./data/extensions:/home/root/.local/share/extensions
+#      - ./data/code-server:/root/.local/share/code-server
 
     ports:
-      - "8000:8000"
-      - "8080:8080"
+      - "8001:8000"
