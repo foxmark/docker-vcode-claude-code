@@ -5,7 +5,7 @@ services:
     container_name: vscode_container
     volumes:
       - ./code:/workspace
-      - ./config/code-server-config.yaml:/home/developer/.config/code-server/config.yaml
+      - ./config:/home/developer/.config/code-server/
       - /data:/home/developer/.local/share/code-server
 
     ports:
