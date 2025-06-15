@@ -1,17 +1,30 @@
-FROM node:lts
+# Use Node.js v20 (required by code-server)
+FROM node:20.10.0-alpine
 
-# Install Claude Code
+# Install security updates and required packages
+RUN apk update && apk upgrade && \
+    apk add --no-cache curl bash sudo
+
+# Create non-root user
+RUN addgroup -g 1001 -S developer && \
+    adduser -S developer -u 1001 -G developer
+
+# Set up npm global directory for non-root user
+RUN mkdir -p /home/developer/.npm-global && \
+    chown -R developer:developer /home/developer/.npm-global
+
+# Install code-server globally as root (required for system-wide access)
+RUN npm install -g code-server@4.100.3 --unsafe-perm
+
+# Switch to non-root user and configure npm for user packages
+USER developer
+ENV NPM_CONFIG_PREFIX=/home/developer/.npm-global
+ENV PATH=$PATH:/home/developer/.npm-global/bin
+
+# Install Claude Code as non-root user
 RUN npm install -g @anthropic-ai/claude-code
 
-# USER node
-
-# Install VS Code Server
-RUN curl -fsSL https://code-server.dev/install.sh | sh
-
-#RUN mkdir -p /home/developer/.local/share/code-server/extensions
-#RUN mkdir -p /home/developer/.claudecode
-
-# Install VS Code extensions
+# Install extensions as non-root user
 RUN code-server --install-extension ecmel.vscode-html-css && \
     code-server --install-extension esbenp.prettier-vscode && \
     code-server --install-extension ms-azuretools.vscode-containers && \
@@ -21,9 +34,16 @@ RUN code-server --install-extension ecmel.vscode-html-css && \
     code-server --install-extension zobo.php-intellisense && \
     code-server --install-extension redhat.vscode-xml
 
-RUN mkdir /workspace
-WORKDIR /workspace
+# Create workspace with proper permissions
+RUN mkdir -p /home/developer/workspace
+WORKDIR /home/developer/workspace
 
-EXPOSE 8080 3000 8000
+# Only expose necessary port
+EXPOSE 8000
 
-CMD ["code-server", "--bind-addr", "0.0.0.0:8000", "--auth", "none", "/workspace"]
+# Set environment variables for security
+# ENV PASSWORD=changeme123!
+ENV SHELL=/bin/bash
+
+# Run as non-root user with authentication
+CMD ["code-server", "--bind-addr", "0.0.0.0:8000", "--auth", "password", "/home/developer/workspace"]
